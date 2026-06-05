@@ -14,86 +14,89 @@
 }
 
 body{
-    background:#0a0f1d;
+    background:#09101f;
     font-family:Arial, Helvetica, sans-serif;
     color:white;
     min-height:100vh;
+    padding:25px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding:30px 15px;
 }
 
 h1{
     margin-bottom:20px;
+    font-size:34px;
     text-align:center;
-    font-size:32px;
 }
 
 .controls{
     width:100%;
-    max-width:700px;
+    max-width:900px;
     background:#101b33;
-    padding:20px;
-    border-radius:16px;
-    margin-bottom:25px;
     border:2px solid #1e3a70;
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:25px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
 }
 
 .control-group{
-    margin-bottom:18px;
+    display:flex;
+    flex-direction:column;
 }
 
 label{
-    display:block;
     margin-bottom:8px;
     font-weight:bold;
-    font-size:15px;
+    font-size:14px;
 }
 
 input{
-    width:100%;
     padding:12px;
     border:none;
     border-radius:10px;
     font-size:18px;
-    outline:none;
 }
 
 button{
+    margin-top:25px;
     width:100%;
-    padding:15px;
+    padding:16px;
     border:none;
     border-radius:12px;
     background:#f4b400;
     color:#000;
-    font-weight:bold;
     font-size:18px;
+    font-weight:bold;
     cursor:pointer;
-    transition:0.2s;
 }
 
 button:hover{
-    transform:scale(1.02);
+    opacity:0.9;
 }
 
-.canvas-wrapper{
+.canvas-wrap{
     width:100%;
     max-width:1200px;
-    position:relative;
 }
 
-#posterCanvas{
+canvas{
     width:100%;
-    border-radius:16px;
-    box-shadow:0 0 25px rgba(0,0,0,0.5);
+    border-radius:18px;
+    box-shadow:0 0 30px rgba(0,0,0,0.45);
 }
 
 .note{
-    margin-top:15px;
-    font-size:14px;
-    opacity:0.8;
+    margin-top:18px;
+    opacity:0.7;
     text-align:center;
+    line-height:1.5;
 }
 </style>
 </head>
@@ -104,19 +107,53 @@ button:hover{
 
 <div class="controls">
 
-    <div class="control-group">
-        <label>Ball Number 1</label>
-        <input type="number" id="ball1" value="4">
-    </div>
+    <div class="grid">
 
-    <div class="control-group">
-        <label>Ball Number 2</label>
-        <input type="number" id="ball2" value="9">
-    </div>
+        <div class="control-group">
+            <label>Ball Number 1</label>
+            <input type="number" id="ball1" value="4">
+        </div>
 
-    <div class="control-group">
-        <label>Jackpot Value (£)</label>
-        <input type="number" id="jackpot" value="500">
+        <div class="control-group">
+            <label>Ball 1 X Position</label>
+            <input type="number" id="ball1X" value="452">
+        </div>
+
+        <div class="control-group">
+            <label>Ball 1 Y Position</label>
+            <input type="number" id="ball1Y" value="548">
+        </div>
+
+        <div class="control-group">
+            <label>Ball Number 2</label>
+            <input type="number" id="ball2" value="9">
+        </div>
+
+        <div class="control-group">
+            <label>Ball 2 X Position</label>
+            <input type="number" id="ball2X" value="792">
+        </div>
+
+        <div class="control-group">
+            <label>Ball 2 Y Position</label>
+            <input type="number" id="ball2Y" value="548">
+        </div>
+
+        <div class="control-group">
+            <label>Jackpot Value (£)</label>
+            <input type="number" id="jackpot" value="500">
+        </div>
+
+        <div class="control-group">
+            <label>Jackpot X Position</label>
+            <input type="number" id="jackpotX" value="920">
+        </div>
+
+        <div class="control-group">
+            <label>Jackpot Y Position</label>
+            <input type="number" id="jackpotY" value="880">
+        </div>
+
     </div>
 
     <button onclick="downloadImage()">
@@ -125,12 +162,13 @@ button:hover{
 
 </div>
 
-<div class="canvas-wrapper">
+<div class="canvas-wrap">
     <canvas id="posterCanvas" width="1250" height="1250"></canvas>
 </div>
 
 <div class="note">
-    Upload your image as <strong>background.jpg</strong> in the same GitHub folder as this HTML file.
+    Save your supplied image as <strong>background.jpg</strong><br>
+    and place it in the same GitHub folder as this HTML file.
 </div>
 
 <script>
@@ -140,9 +178,8 @@ const ctx = canvas.getContext("2d");
 const bg = new Image();
 bg.src = "background.jpg";
 
-const ball1Input = document.getElementById("ball1");
-const ball2Input = document.getElementById("ball2");
-const jackpotInput = document.getElementById("jackpot");
+// Inputs
+const inputs = document.querySelectorAll("input");
 
 function drawPoster(){
 
@@ -150,61 +187,73 @@ function drawPoster(){
 
     ctx.drawImage(bg,0,0,canvas.width,canvas.height);
 
-    // -----------------------------
-    // BALL NUMBERS
-    // -----------------------------
+    // =========================
+    // GET VALUES
+    // =========================
 
-    ctx.fillStyle = "#0a1730";
-    ctx.font = "bold 140px Arial";
+    const ball1 = document.getElementById("ball1").value;
+    const ball2 = document.getElementById("ball2").value;
+    const jackpot = document.getElementById("jackpot").value;
+
+    const ball1X = parseInt(document.getElementById("ball1X").value);
+    const ball1Y = parseInt(document.getElementById("ball1Y").value);
+
+    const ball2X = parseInt(document.getElementById("ball2X").value);
+    const ball2Y = parseInt(document.getElementById("ball2Y").value);
+
+    const jackpotX = parseInt(document.getElementById("jackpotX").value);
+    const jackpotY = parseInt(document.getElementById("jackpotY").value);
+
+    // =========================
+    // BALL NUMBERS
+    // =========================
+
+    ctx.fillStyle = "#0b1830";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // Left Ball
-    ctx.fillText(ball1Input.value, 452, 548);
+    ctx.font = "bold 140px Arial";
 
-    // Right Ball
-    ctx.fillText(ball2Input.value, 792, 548);
+    ctx.fillText(ball1, ball1X, ball1Y);
+    ctx.fillText(ball2, ball2X, ball2Y);
 
-    // -----------------------------
-    // JACKPOT VALUE
-    // -----------------------------
+    // =========================
+    // GOLD JACKPOT TEXT
+    // =========================
 
-    // Gold gradient similar to image
     const gradient = ctx.createLinearGradient(0,0,0,150);
-    gradient.addColorStop(0, "#ffd95f");
+
+    gradient.addColorStop(0, "#ffe27a");
     gradient.addColorStop(0.5, "#f4b400");
     gradient.addColorStop(1, "#c78600");
 
     ctx.fillStyle = gradient;
 
+    ctx.shadowColor = "rgba(255,190,0,0.8)";
+    ctx.shadowBlur = 14;
+
     ctx.font = "bold 135px Arial";
-    ctx.textAlign = "center";
 
-    // Value positioned between £ and +
-    ctx.fillText(jackpotInput.value, 920, 880);
-
-    // subtle glow
-    ctx.shadowColor = "rgba(255,190,0,0.7)";
-    ctx.shadowBlur = 12;
-
-    ctx.fillText(jackpotInput.value, 920, 880);
+    ctx.fillText(jackpot, jackpotX, jackpotY);
 
     ctx.shadowBlur = 0;
 }
 
 bg.onload = drawPoster;
 
-ball1Input.addEventListener("input", drawPoster);
-ball2Input.addEventListener("input", drawPoster);
-jackpotInput.addEventListener("input", drawPoster);
+inputs.forEach(input => {
+    input.addEventListener("input", drawPoster);
+});
 
 function downloadImage(){
 
     drawPoster();
 
     const link = document.createElement("a");
+
     link.download = "runcorn-town-pick2.png";
     link.href = canvas.toDataURL("image/png");
+
     link.click();
 }
 </script>
